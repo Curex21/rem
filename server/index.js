@@ -1,29 +1,36 @@
-var app = require("express")(),
-    http = require("http").createServer(app),
-    io = require("socket.io")(http),
-    port = process.env.PORT || 3000, //asigno un puerto de entrada a la conexion
-    publicDir = `${__dirname}/public`; // direccion del directorio de los html cliente y servidor
+import express from "express";
+import httpServer from "http";
+import socket from "socket.io";
+import path from "path";
+const __dirname = path.resolve();
 
-// servidor web escucha el puerto y envia mensaje de ejecución
+let app = express();
+let http = httpServer.createServer(app);
+let io = socket(http);
+
+const port = process.env.PORT || 3000;
+
+const publicDir = `${__dirname}/public`;
+
+// start http server
 http.listen(port, () => {
     console.log("Iniciando Express y Socket.IO en localhost:%d", port);
 });
 
-// aplicación
-app
-    // ruta de ciente , usuaros para ver el streaming
-    .get("/", (req, res) => {
-        //
-        res.sendFile(`${publicDir}/client.html`);
-    })
-    // ruta servidor, emisión de video por parte de usuarios
-    .get("/streaming", (req, res) => {
-        res.sendFile(`${publicDir}/server.html`);
-    });
-// socket.io
+// route to the root path '/'
+app.get("/", (req, res) => {
+    // res.sendFile(`${publicDir}/client.html`);
+    res.sendFile(`${publicDir}/remboard.html`);
+});
+
+// route to the /streaming path
+app.get("/streaming", (req, res) => {
+    res.sendFile(`${publicDir}/server.html`);
+});
+
+// starts the socker.io connection
 io.on("connection", (socket) => {
     socket.on("streaming", (image) => {
         io.emit("play stream", image);
-        //console.log(image)
     });
 });
