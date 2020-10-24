@@ -4,7 +4,7 @@
     "description": "primer prototipo de streaming",
     "main": "index.js",
     "scripts": {
-        "start": "node index.js"
+        "start": "node server/index.js"
     },
     "repository": {
         "type": "git",
