@@ -1,24 +1,24 @@
 {
-  "name": "streaming",
-  "version": "0.0.1",
-  "description": "primer prototipo de streaming",
-  "main": "index.js",
-  "scripts": {
-    "test": "Express,socket.io,Canvas"
-  },
-  "repository": {
-    "type": "git",
-    "url": "Curo"
-  },
-  "keywords": [
-    "Express",
-    "socket.io",
-    "canvas"
-  ],
-  "author": "Curo",
-  "license": "MIT",
-  "dependencies": {
-    "express": "^4.17.1",
-    "socket.io": "^2.3.0"
-  }
+    "name": "rem-board",
+    "version": "0.0.1",
+    "description": "primer prototipo de streaming",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "Curo"
+    },
+    "keywords": [
+        "Express",
+        "socket.io",
+        "canvas"
+    ],
+    "author": "Curo",
+    "license": "MIT",
+    "dependencies": {
+        "express": "^4.17.1",
+        "socket.io": "^2.3.0"
+    }
 }
