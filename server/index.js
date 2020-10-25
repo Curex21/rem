@@ -30,7 +30,8 @@ app.get("/streaming", (req, res) => {
 
 // starts the socker.io connection
 io.on("connection", (socket) => {
-    socket.on("streaming", (image) => {
-        io.emit("play stream", image);
+    socket.on("drawing", (data) => {
+        console.log(data);
+        // Check if the user exist into userlist
     });
 });

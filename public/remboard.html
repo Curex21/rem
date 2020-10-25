@@ -4,33 +4,64 @@
         <meta charset="UTF-8" />
         <title>Rem Board Stream</title>
         <style>
+            /* body {
+                background-color: aquamarine;
+            } */
+
             #board {
-                width: fit-content;
+                /* position: relative; */
+                width: 600px;
+                height: 600px;
+
                 border: red solid 2px;
+            }
+
+            #canvas-board {
+                position: absolute;
+                background-color: transparent;
+                z-index: 2;
+            }
+
+            #image-bg {
+                position: absolute;
+                z-index: 1;
             }
         </style>
     </head>
     <body>
-        <p>v0.0.1</p>
+        <h3>Board canvas base demo</h3>
+        <p>A simple case of use of a canvas based board.</p>
         <div id="board">
-            <canvas id="canvas-board" width="800px" height="800px" />
+            <canvas id="canvas-board" width="600px" height="600px"></canvas>
+            <img
+                id="image-bg"
+                src="https://source.unsplash.com/600x600/?laboratory,university"
+                alt="placeholder image"
+            />
         </div>
         <script src="/socket.io/socket.io.js"></script>
         <script>
             window.onload = () => {
+                const ioInstance = io();
                 var selectCanvas = document.getElementById("canvas-board");
-                const selectedColor = "#3123a3";
+                const selectedColor = "#dbf55b";
                 // var brushPalette = document.getElementById("brushPalette");
-
-                console.log(selectCanvas);
+                // selectCanvas.console.log(selectCanvas);
 
                 if (selectCanvas) {
                     const start = (e) => {
                         isDown = true;
+                        // [draw start cmd]
+                        ioInstance.emit("drawing", `U${1}-S`);
+
                         context.beginPath();
                         canvasX = e.pageX - selectCanvas.offsetLeft;
                         canvasY = e.pageY - selectCanvas.offsetTop;
                         context.moveTo(canvasX, canvasY);
+
+                        // [canvasX0, canvasY0]
+                        ioInstance.emit("drawing", `U${1}-D-(${[canvasX, canvasY]})`);
+                        // "string template js"
                     };
 
                     const draw = (e) => {
@@ -40,12 +71,16 @@
                             context.lineTo(canvasX, canvasY);
                             context.strokeStyle = selectedColor;
                             context.stroke();
+                            // [canvasX1, canvasY1, canvasX2, canvasY2, ...]
+                            ioInstance.emit("drawing", `U${1}-D-(${[canvasX, canvasY]})`);
                         }
                     };
 
                     const stop = (e) => {
                         isDown = false;
                         context.closePath();
+                        // [draw end cmd]
+                        ioInstance.emit("drawing", `U${1}-E`);
                     };
 
                     selectCanvas.addEventListener("mousedown", start, false);
