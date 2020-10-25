@@ -1,20 +1,11 @@
 {
     "name": "rem-board",
     "version": "0.0.1",
+    "type": "module",
     "description": "primer prototipo de streaming",
-    "main": "index.js",
     "scripts": {
         "start": "node server/index.js"
     },
-    "repository": {
-        "type": "git",
-        "url": "Curo"
-    },
-    "keywords": [
-        "Express",
-        "socket.io",
-        "canvas"
-    ],
     "author": "Curo",
     "license": "MIT",
     "dependencies": {

@@ -8,3 +8,7 @@ Done
 
 -   Create a functional file structure.
 -   JS for all
+
+TODOs:
+
+-   [ ] Generate an unique idetifier for each user
