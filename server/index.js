@@ -31,7 +31,17 @@ app.get("/streaming", (req, res) => {
 // starts the socker.io connection
 io.on("connection", (socket) => {
     socket.on("drawing", (data) => {
+        io.sockets.emit("drawing",data);
         console.log(data);
+    
+        
         // Check if the user exist into userlist
     });
+io.on('connection', (socket) => {
+        socket.on('streaming', (image) => {
+            io.emit('play stream', image)
+            //console.log(image)
+        });
+
+});
 });
