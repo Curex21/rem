@@ -36,28 +36,44 @@
 
         <div id="board">
             <canvas id="canvas-board" width="600px" height="600px"></canvas>
-            <img id="streaming" />
+            <!-- <img id="streaming" />
             <script>
                 (function (d, io) {
                     var io = io();
-
                     io.on("play stream", function (image) {
                         d.querySelector("#streaming").src = image;
                     });
                 })(document, io);
-            </script>
+            </script> -->
         </div>
 
         <script>
             let globalRemUserID;
             window.onload = () => {
-                const ioInstance = io();
-                var selectCanvas = document.getElementById("canvas-board");
-                const selectedColor = "#dbf55b";
+                const ioInstance = io({
+                    query: {
+                        remID: localStorage.getItem("remUserID"),
+                    },
+                });
 
                 const remUserID = localStorage.getItem("remUserID");
-
                 if (remUserID && remUserID !== "") globalRemUserID = remUserID;
+
+                ioInstance.on("register", (data) => {
+                    console.log("register", data);
+                    if (globalRemUserID && globalRemUserID !== "") return;
+                    localStorage.setItem("remUserID", data.remID);
+                    // localStorage.setItem("remUserColor", data.color)
+                    globalRemUserID = data.remID;
+                });
+
+                // ioInstance.emit("indentify", {})
+
+                var selectCanvas = document.getElementById("canvas-board");
+                var isDown = false;
+                var context = selectCanvas.getContext("2d");
+                var canvasX, canvasY;
+                context.lineWidth = 2;
 
                 // var brushPalette = document.getElementById("brushPalette");
                 // selectCanvas.console.log(selectCanvas);
@@ -68,13 +84,12 @@
                         // [draw start cmd]
                         ioInstance.emit("drawing", { user: globalRemUserID, event: "start" });
 
-                        context.beginPath();
+                        // context.beginPath();
                         canvasX = e.pageX - selectCanvas.offsetLeft;
                         canvasY = e.pageY - selectCanvas.offsetTop;
-                        context.moveTo(canvasX, canvasY);
+                        // context.moveTo(canvasX, canvasY);
 
                         // [canvasX0, canvasY0]
-
                         ioInstance.emit("drawing", {
                             user: globalRemUserID,
                             event: "draw",
@@ -88,9 +103,9 @@
                         if (isDown) {
                             canvasX = e.pageX - selectCanvas.offsetLeft;
                             canvasY = e.pageY - selectCanvas.offsetTop;
-                            context.lineTo(canvasX, canvasY);
-                            context.strokeStyle = selectedColor;
-                            context.stroke();
+                            // context.lineTo(canvasX, canvasY);
+                            // context.strokeStyle = selectedColor;
+                            // context.stroke();
                             // [canvasX1, canvasY1, canvasX2, canvasY2, ...]
                             ioInstance.emit("drawing", {
                                 user: globalRemUserID,
@@ -121,11 +136,6 @@
                     //     false
                     // );
 
-                    var isDown = false;
-                    var context = selectCanvas.getContext("2d");
-                    var canvasX, canvasY;
-                    context.lineWidth = 2;
-
                     // function changeStroke(e, obj) {
                     //     if (e.target.dataset.stroke) {
                     //         var parent = e.target.parentElement.children;
@@ -149,22 +159,34 @@
 
                     //})
 
-                    ioInstance.on("register", (data) => {
-                        if (globalRemUserID && globalRemUserID !== "") return;
-
-                        localStorage.setItem("remUserID", data);
-                        globalRemUserID = data;
-                    });
+                    // ioInstance.on("start", (data) => {
+                    //     const id = localStorage.getItem("remUserID");
+                    //     if (id) {
+                    //         ioInstance.emit("identify", {
+                    //             id: id,
+                    //         });
+                    //     }
+                    // });
 
                     ioInstance.on("to-draw", (data) => {
                         console.log(data);
                         if (data.event === "start") {
-                            // data.user
-                            // canvasX = e.pageX - selectCanvas.offsetLeft;
-                            // canvasY = e.pageY - selectCanvas.offsetTop;
-                            // context.lineTo(canvasX, canvasY);
-                            // context.strokeStyle = selectedColor;
-                            // context.stroke();
+                            isDown = true;
+                        }
+
+                        if (data.event === "draw") {
+                            if (isDown) {
+                                canvasX = data.payload.x;
+                                canvasY = data.payload.y;
+                                context.lineTo(canvasX, canvasY);
+                                context.strokeStyle = data.color;
+                                context.stroke();
+                            }
+                        }
+
+                        if (data.event === "stop") {
+                            isDown = false;
+                            context.closePath();
                         }
                     });
                 }

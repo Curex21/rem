@@ -3,8 +3,15 @@ import httpServer from "http";
 import socket from "socket.io";
 import path from "path";
 import { nanoid } from "nanoid";
+import low from "lowdb";
+import FileSync from "lowdb/adapters/FileSync.js";
 
 const __dirname = path.resolve();
+
+const adapter = new FileSync("db.json");
+const db = low(adapter);
+
+db.defaults({ users: [] }).write();
 
 let app = express();
 let http = httpServer.createServer(app);
@@ -37,27 +44,49 @@ app.get("/streaming", (req, res) => {
 
 // starts the socker.io connection
 io.on("connection", (socket) => {
-    const newID = nanoid(8);
+    // db.get("users").filter({id: })
+    let remID = socket.handshake.query.remID;
+    let color = "#000";
+
+    console.log("id:", remID);
+
+    if (remID === undefined || remID === null || remID === "null") {
+        remID = nanoid(8);
+        color = colors[1]; // TODO: Make a dynamic color assign
+        db.get("users").push({ id: remID, color: color }).write();
+        setTimeout(() => {
+            socket.emit("register", { remID: remID });
+        }, 1000);
+    } else {
+        const users = db.get("users").filter({ id: remID }).value();
+        console.log(users);
+        if (users && users.length > 0) {
+            color = users[0].color;
+        }
+    }
 
     // socket.
     // console.log(totalUsersConnected);
 
-    if (totalUsersConnected > colors.length - 1) return; // TODO: Response with a gentle error;
+    // if (totalUsersConnected > colors.length - 1) return; // TODO: Response with a gentle error;
 
-    socket.emit("register", newID);
+    // const color = colors[totalUsersConnected];
+    // userColors[newID] = color;
+    // totalUsersConnected += 1;
 
-    const color = colors[totalUsersConnected];
-    userColors[newID] = color;
-    totalUsersConnected += 1;
-
-    console.log(userColors);
+    // console.log(userColors);
 
     socket.on("drawing", (data) => {
         // Check if the user exist into userlist
-        const color = userColors[data.user];
-        console.log(data.user, color);
+        // const color = userColors[data.user];
+        // console.log(data.user, color);
         io.emit("to-draw", { ...data, color });
+        // socket.broadcast.emit("to-draw", { ...data, color });
         // socket.broadcast.emit("to-draw", data);
+    });
+
+    socket.on("identify", (data) => {
+        data.id;
     });
 });
 
