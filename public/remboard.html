@@ -158,6 +158,14 @@
 
                     ioInstance.on("to-draw", (data) => {
                         console.log(data);
+                        if (data.event === "start") {
+                            // data.user
+                            // canvasX = e.pageX - selectCanvas.offsetLeft;
+                            // canvasY = e.pageY - selectCanvas.offsetTop;
+                            // context.lineTo(canvasX, canvasY);
+                            // context.strokeStyle = selectedColor;
+                            // context.stroke();
+                        }
                     });
                 }
             };

@@ -39,6 +39,7 @@ app.get("/streaming", (req, res) => {
 io.on("connection", (socket) => {
     const newID = nanoid(8);
 
+    // socket.
     // console.log(totalUsersConnected);
 
     if (totalUsersConnected > colors.length - 1) return; // TODO: Response with a gentle error;
@@ -49,9 +50,12 @@ io.on("connection", (socket) => {
     userColors[newID] = color;
     totalUsersConnected += 1;
 
+    console.log(userColors);
+
     socket.on("drawing", (data) => {
         // Check if the user exist into userlist
         const color = userColors[data.user];
+        console.log(data.user, color);
         io.emit("to-draw", { ...data, color });
         // socket.broadcast.emit("to-draw", data);
     });
