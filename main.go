@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -29,7 +30,8 @@ func main() {
 	// Everything below is the Pion WebRTC API, thanks for using it ❤️.
 	offer := webrtc.SessionDescription{}
 	Decode(<-sdpChan, &offer)
-	fmt.Println("")
+
+	log.Println("decoded sdp input, offer.type=" + offer.Type.String())
 
 	peerConnectionConfig := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
@@ -45,6 +47,8 @@ func main() {
 		panic(err)
 	}
 
+	log.Println("created peer connection")
+
 	// Allow us to receive 1 video track
 	if _, err = peerConnection.AddTransceiverFromKind(webrtc.RTPCodecTypeVideo); err != nil {
 		panic(err)
@@ -57,6 +61,9 @@ func main() {
 	peerConnection.OnTrack(func(remoteTrack *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
 		// Send a PLI on an interval so that the publisher is pushing a keyframe every rtcpPLIInterval
 		// This can be less wasteful by processing incoming RTCP events, then we would emit a NACK/PLI when a viewer requests it
+
+		log.Println("tracking peer connection")
+
 		go func() {
 			ticker := time.NewTicker(rtcpPLIInterval)
 			for range ticker.C {
@@ -96,11 +103,15 @@ func main() {
 		panic(err)
 	}
 
+	log.Println("setted remote description")
+
 	// Create answer
 	answer, err := peerConnection.CreateAnswer(nil)
 	if err != nil {
 		panic(err)
 	}
+
+	log.Println("created new peer answer")
 
 	// Create channel that is blocked until ICE Gathering is complete
 	gatherComplete := webrtc.GatheringCompletePromise(peerConnection)
@@ -126,6 +137,8 @@ func main() {
 
 		recvOnlyOffer := webrtc.SessionDescription{}
 		Decode(<-sdpChan, &recvOnlyOffer)
+
+		log.Println("decoded sdp input, recvOnlyOffer.type=" + recvOnlyOffer.Type.String())
 
 		// Create a new PeerConnection
 		peerConnection, err := webrtc.NewPeerConnection(peerConnectionConfig)

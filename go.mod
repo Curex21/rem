@@ -1,4 +1,4 @@
-module github.com/Curex21/rem
+module github.com/bregydoc/rem
 
 go 1.15
 
