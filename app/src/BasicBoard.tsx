@@ -45,7 +45,7 @@ const BasicBoard: React.FC<BasicBoardProps> = ({
 
     const addPoint = (p5: P5, j: number, cX: number, cY: number, baseR: number) => {
         const c = p5.color(pointerColor);
-        c.setAlpha(100 * (1 - (1 / smoothSegments) * j));
+        c.setAlpha(100 * Math.max(0, 0.6 - (1 / smoothSegments) * j));
 
         points = [
             ...points,
