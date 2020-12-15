@@ -21,6 +21,13 @@ func HTTPSDPServer(defaultPort int) chan string {
 		sdpChan <- string(body)
 	})
 
+	http.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "text/html")
+		data, _ := ioutil.ReadFile("app/index.html")
+		w.WriteHeader(200)
+		w.Write(data)
+	})
+
 	go func() {
 		p := ":" + strconv.Itoa(*port)
 		log.Println("starting HTTP server at " + p)

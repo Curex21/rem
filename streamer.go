@@ -4,7 +4,7 @@ import (
 	"github.com/xfrr/goffmpeg/transcoder"
 )
 
-func launchStreamer() {
+func launchStreamerX() {
 	var inputPath = "/data/testmov"
 	var outputPath = "/data/testmp4.mp4"
 
@@ -25,9 +25,4 @@ func launchStreamer() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func main() {
-	// launchSocketIOService()
-	launchStreamer()
 }
