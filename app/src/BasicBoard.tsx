@@ -14,10 +14,12 @@ interface BasicBoardProps {
     pointerColor: string;
     pointerScale?: number;
     pointerSmooth?: number;
+    onCanvasLoaded?: (canvas: HTMLCanvasElement) => void;
 }
 
 const BasicBoard: React.FC<BasicBoardProps> = ({
     pointerColor,
+    onCanvasLoaded: onCanvasRef,
     pointerScale = 1,
     pointerSmooth = 1,
 }: BasicBoardProps) => {
@@ -31,6 +33,7 @@ const BasicBoard: React.FC<BasicBoardProps> = ({
     const setup = (p5: P5, canvasParentRef: Element) => {
         p5.createCanvas(500, 500).parent(canvasParentRef);
         p5.background("transparent");
+        onCanvasRef && onCanvasRef(canvasParentRef as HTMLCanvasElement);
     };
 
     const draw = (p5: P5) => {

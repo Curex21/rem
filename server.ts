@@ -20,35 +20,68 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new socketIO.Server(server);
 
-let broadcaster: string;
+let nodes: Set<string> = new Set();
 
 io.sockets.on("error", (err) => console.log(err));
 
 io.sockets.on("connection", (socket) => {
-    socket.on("broadcaster", () => {
-        broadcaster = socket.id;
-        socket.broadcast.emit("broadcaster");
+    socket.on("node-connection", (newNodeID: string) => {
+        nodes.add(newNodeID);
+
+        console.log("new connection: " + newNodeID);
+
+        Array.from(nodes).map((node: string) => {
+            if (node === newNodeID) {
+                return;
+            }
+            console.log(`send (${newNodeID}) to other node (${node})`);
+            socket.to(node).emit("node-connection", newNodeID);
+        });
     });
 
-    socket.on("watcher", () => {
-        socket.to(broadcaster).emit("watcher", socket.id);
+    socket.on("node-watcher", (who: string) => {
+        console.log("receive watcher signal: " + who);
+        socket.to(socket.id).emit("node-watcher", who);
+        // socket.broadcast.emit("node-watcher", id);
     });
 
-    socket.on("disconnect", () => {
-        socket.to(broadcaster).emit("disconnectPeer", socket.id);
+    socket.on("disconnect", (id: string, msg: string) => {
+        console.log("disconnect pair: " + socket.id);
+        Array.from(nodes).map((node) => {
+            if (node === id) {
+                return;
+            }
+            console.log("closing connection to other nodes: " + node);
+            socket.to(node).emit("disconnectPeer", id);
+        });
+        nodes.delete(id);
+        // socket.to(broadcaster).emit("disconnectPeer", socket.id);
     });
 
-    socket.on("offer", (id: string, message: string) => {
-        socket.to(id).emit("offer", socket.id, message);
-    });
+    // socket.on("broadcaster", () => {
+    //     broadcaster = socket.id;
+    //     socket.broadcast.emit("broadcaster");
+    // });
 
-    socket.on("answer", (id: string, message: string) => {
-        socket.to(id).emit("answer", socket.id, message);
-    });
+    // socket.on("watcher", () => {
+    //     socket.to(broadcaster).emit("watcher", socket.id);
+    // });
 
-    socket.on("candidate", (id: string, message: string) => {
-        socket.to(id).emit("candidate", socket.id, message);
-    });
+    // socket.on("disconnect", () => {
+    //     socket.to(broadcaster).emit("disconnectPeer", socket.id);
+    // });
+
+    // socket.on("offer", (id: string, message: string) => {
+    //     socket.to(id).emit("offer", socket.id, message);
+    // });
+
+    // socket.on("answer", (id: string, message: string) => {
+    //     socket.to(id).emit("answer", socket.id, message);
+    // });
+
+    // socket.on("candidate", (id: string, message: string) => {
+    //     socket.to(id).emit("candidate", socket.id, message);
+    // });
 });
 
 //@ts-ignore

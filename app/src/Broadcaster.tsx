@@ -1,12 +1,17 @@
-import React, { FC, useEffect } from "react";
+import React, { FC, Ref, useEffect } from "react";
 // import { Manager } from "socket.io-client";
 import { SOCKETIO_ENDPOINT } from "./socket";
 import socketIOClient from "socket.io-client";
 
-const Broadcaster: FC = () => {
-    useEffect(() => {
-        const peerConnections: { [key: string]: RTCPeerConnection } = {};
+let peerConnections: { [key: string]: RTCPeerConnection } = {};
+let ownID: string;
 
+interface PropsBroadcaster {
+    canvasElement: HTMLCanvasElement | undefined;
+}
+
+const Broadcaster: FC<PropsBroadcaster> = ({ canvasElement: canvasRef }: PropsBroadcaster) => {
+    useEffect(() => {
         const config = {
             iceServers: [
                 {
@@ -32,33 +37,38 @@ const Broadcaster: FC = () => {
             .getUserMedia(constraints)
             .then((stream) => {
                 video.srcObject = stream;
-                socket.emit("broadcaster");
+                socket.emit("node-connection", socket.id);
             })
             .catch((error) => console.error(error));
 
-        socket.on("watcher", (id: string) => {
+        socket.on("node-connection", (peerID: string) => {
+            console.log(`node-connection (${peerID}) send to node-watcher (${ownID})`);
+            socket.to(peerID).emit("node-watcher", ownID); // cross roads
+        });
+
+        socket.on("node-watcher", (who: string) => {
             const peerConnection = new RTCPeerConnection(config);
-            peerConnections[id] = peerConnection;
+            peerConnections[who] = peerConnection;
 
-            let stream = video.srcObject as MediaStream;
-            if (stream === undefined || stream === null) {
-                return;
-            }
+            //@ts-ignore
+            let stream: MediaStream = canvasRef.captureStream(25);
 
-            stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
+            console.log(stream);
 
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    socket.emit("candidate", id, event.candidate);
-                }
-            };
+            // stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
 
-            peerConnection
-                .createOffer()
-                .then((sdp) => peerConnection.setLocalDescription(sdp))
-                .then(() => {
-                    socket.emit("offer", id, peerConnection.localDescription);
-                });
+            // peerConnection.onicecandidate = (event) => {
+            //     if (event.candidate) {
+            //         socket.emit("candidate", id, event.candidate);
+            //     }
+            // };
+
+            // peerConnection
+            //     .createOffer()
+            //     .then((sdp) => peerConnection.setLocalDescription(sdp))
+            //     .then(() => {
+            //         socket.emit("offer", id, peerConnection.localDescription);
+            //     });
         });
 
         socket.on("answer", (id: string, description: RTCSessionDescription) => {
@@ -74,8 +84,13 @@ const Broadcaster: FC = () => {
             delete peerConnections[id];
         });
 
-        window.onunload = window.onbeforeunload = () => {
-            socket.close();
+        // window.onunload = window.onbeforeunload = () => {
+        //     ;
+        // };
+
+        return () => {
+            // console.log("sending socket disconnection");
+            // socket.close();
         };
     }, []);
 
