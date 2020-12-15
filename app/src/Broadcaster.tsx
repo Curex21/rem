@@ -40,14 +40,12 @@ const Broadcaster: FC = () => {
             const peerConnection = new RTCPeerConnection(config);
             peerConnections[id] = peerConnection;
 
-            let stream = video.srcObject;
+            let stream = video.srcObject as MediaStream;
             if (stream === undefined || stream === null) {
                 return;
             }
 
-            (stream as MediaStream)
-                .getTracks()
-                .forEach((track) => peerConnection.addTrack(track, stream as MediaStream));
+            stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
 
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
@@ -77,7 +75,7 @@ const Broadcaster: FC = () => {
         });
 
         window.onunload = window.onbeforeunload = () => {
-            socket._close();
+            socket.close();
         };
     }, []);
 

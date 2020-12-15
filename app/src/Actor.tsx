@@ -27,8 +27,6 @@ const Actor = () => {
         socket.on("offer", (id: string, description: RTCSessionDescriptionInit) => {
             peerConnection = new RTCPeerConnection(config);
 
-            console.log(peerConnection);
-
             peerConnection
                 .setRemoteDescription(description)
                 .then(() => peerConnection.createAnswer())
@@ -65,7 +63,7 @@ const Actor = () => {
         });
 
         window.onunload = window.onbeforeunload = () => {
-            socket._close();
+            socket.close();
         };
     }, []);
 
