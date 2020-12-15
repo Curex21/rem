@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import socketIO from "socket.io";
-import { Manager } from "socket.io-client";
+// import { Manager } from "socket.io-client";
 import { SOCKETIO_ENDPOINT } from "./socket";
+import socketIOClient from "socket.io-client";
 
 const Actor = () => {
     useEffect(() => {
@@ -15,22 +15,20 @@ const Actor = () => {
             ],
         };
 
-        const socket = new Manager(SOCKETIO_ENDPOINT);
+        //@ts-ignore
+        const socket = socketIOClient(SOCKETIO_ENDPOINT);
 
-        const video = document.querySelector("video#actor");
+        const video = document.querySelector<HTMLVideoElement>("video#actor");
 
         if (video === undefined || video === null) {
             return;
         }
-        // Media contrains
-        const constraints = {
-            video: { facingMode: "user" },
-            // Uncomment to enable audio
-            // audio: true,
-        };
 
         socket.on("offer", (id: string, description: RTCSessionDescriptionInit) => {
             peerConnection = new RTCPeerConnection(config);
+
+            console.log(peerConnection);
+
             peerConnection
                 .setRemoteDescription(description)
                 .then(() => peerConnection.createAnswer())
@@ -38,9 +36,11 @@ const Actor = () => {
                 .then(() => {
                     socket.emit("answer", id, peerConnection.localDescription);
                 });
+
             peerConnection.ontrack = (event) => {
                 video.srcObject = event.streams[0];
             };
+
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
                     socket.emit("candidate", id, event.candidate);
@@ -72,7 +72,7 @@ const Actor = () => {
     return (
         <div>
             I'm an Actor
-            <video id={"actor"} playsInline autoPlay></video>
+            <video id="actor" playsInline autoPlay></video>
         </div>
     );
 };

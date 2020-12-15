@@ -1,6 +1,7 @@
 import React, { FC, useEffect } from "react";
-import { Manager } from "socket.io-client";
+// import { Manager } from "socket.io-client";
 import { SOCKETIO_ENDPOINT } from "./socket";
+import socketIOClient from "socket.io-client";
 
 const Broadcaster: FC = () => {
     useEffect(() => {
@@ -14,18 +15,17 @@ const Broadcaster: FC = () => {
             ],
         };
 
-        const socket = new Manager(SOCKETIO_ENDPOINT);
+        //@ts-ignore
+        const socket = socketIOClient(SOCKETIO_ENDPOINT);
 
-        const video = document.querySelector("video");
+        const video = document.querySelector<HTMLVideoElement>("video#broadcaster");
 
         if (video === undefined || video === null) {
             return;
         }
-        // Media contrains
+
         const constraints = {
             video: { facingMode: "user" },
-            // Uncomment to enable audio
-            // audio: true,
         };
 
         navigator.mediaDevices
@@ -33,7 +33,6 @@ const Broadcaster: FC = () => {
             .then((stream) => {
                 video.srcObject = stream;
                 socket.emit("broadcaster");
-                console.log(video);
             })
             .catch((error) => console.error(error));
 
@@ -85,7 +84,7 @@ const Broadcaster: FC = () => {
     return (
         <div>
             I'm the broadcaster
-            <video playsInline autoPlay muted></video>
+            <video id="broadcaster" playsInline autoPlay muted></video>
         </div>
     );
 };
