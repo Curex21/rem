@@ -1,10 +1,21 @@
 import Express from "express";
 import http from "http";
 import socketIO from "socket.io";
-
+import cors from "cors";
 const port = 4000;
 
 const app = Express();
+
+const options: cors.CorsOptions = {
+    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token"],
+    credentials: true,
+    methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
+    origin: "http://localhost:1234",
+    preflightContinue: false,
+};
+
+//@ts-ignore
+app.use(cors());
 
 const server = http.createServer(app);
 const io = new socketIO.Server(server);
@@ -39,5 +50,8 @@ io.sockets.on("connection", (socket) => {
         socket.to(id).emit("candidate", socket.id, message);
     });
 });
+
+//@ts-ignore
+app.options("*", cors());
 
 server.listen(port, () => console.log(`Server is running on port ${port}`));
