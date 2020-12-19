@@ -2,9 +2,11 @@ import React, { useRef } from "react";
 import Actor from "./Actor";
 import BasicBoard from "./BasicBoard";
 import Broadcaster from "./Broadcaster";
+import { useSocketConnection } from "./socket";
 
 const App: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>();
+    const socket = useSocketConnection();
 
     return (
         <>
@@ -13,8 +15,8 @@ const App: React.FC = () => {
                 pointerScale={3}
                 onCanvasLoaded={(canvas) => (canvasRef.current = canvas as HTMLCanvasElement)}
             />
-            <Broadcaster canvasElement={canvasRef.current} />
-            <Actor />
+            <Broadcaster canvasElement={canvasRef.current} socket={socket} />
+            {/* <Actor /> */}
         </>
     );
 };

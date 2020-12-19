@@ -1,42 +1,24 @@
-import Express from "express";
-import http from "http";
 import socketIO from "socket.io";
-import cors from "cors";
-const port = 4000;
-
-const app = Express();
-
-const options: cors.CorsOptions = {
-    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token"],
-    credentials: true,
-    methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
-    origin: "http://localhost:1234",
-    preflightContinue: false,
-};
-
-//@ts-ignore
-app.use(cors());
-
-const server = http.createServer(app);
-const io = new socketIO.Server(server);
 
 let nodes: Set<string> = new Set();
 
-io.sockets.on("error", (err) => console.log(err));
+export const handleSocketConnection = (socket: socketIO.Socket) => {
+    console.log(`socket id: ${socket.id}`);
 
-io.sockets.on("connection", (socket) => {
-    socket.on("node-connection", (newNodeID: string) => {
-        nodes.add(newNodeID);
+    socket.on("node-connection", () => {
+        nodes.add(socket.id);
 
-        console.log("new connection: " + newNodeID);
+        console.log("new connection: " + socket.id);
 
-        Array.from(nodes).map((node: string) => {
-            if (node === newNodeID) {
-                return;
-            }
-            console.log(`send (${newNodeID}) to other node (${node})`);
-            socket.to(node).emit("node-connection", newNodeID);
-        });
+        // Array.from(nodes).forEach((node: string) => {
+        //     if (node === socket.id) {
+        //         return;
+        //     }
+
+        // });
+        // console.log(`send (${socket.id}) to other node (${node})`);
+        console.log(`broadcast from ${socket.id}`);
+        socket.broadcast.emit("node-connection", socket.id);
     });
 
     socket.on("node-watcher", (who: string) => {
@@ -82,9 +64,4 @@ io.sockets.on("connection", (socket) => {
     // socket.on("candidate", (id: string, message: string) => {
     //     socket.to(id).emit("candidate", socket.id, message);
     // });
-});
-
-//@ts-ignore
-app.options("*", cors());
-
-server.listen(port, () => console.log(`Server is running on port ${port}`));
+};
