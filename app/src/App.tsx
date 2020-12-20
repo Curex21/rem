@@ -1,21 +1,24 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Actor from "./Actor";
 import BasicBoard from "./BasicBoard";
 import Broadcaster from "./Broadcaster";
 import { useSocketConnection } from "./socket";
 
 const App: React.FC = () => {
-    const canvasRef = useRef<HTMLCanvasElement>();
+    // const canvasRef = useRef<HTMLCanvasElement>();
+    const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement>();
     const socket = useSocketConnection();
+
+    // console.log(canvasRef);
 
     return (
         <>
             <BasicBoard
-                pointerColor={"#0ef5ce"}
+                pointerColor={"#21f5d9"}
                 pointerScale={3}
-                onCanvasLoaded={(canvas) => (canvasRef.current = canvas as HTMLCanvasElement)}
+                onCanvasLoaded={(canvas) => setCanvasRef(canvas?.children[0] as HTMLCanvasElement)}
             />
-            <Broadcaster canvasElement={canvasRef.current} socket={socket} />
+            <Broadcaster canvasElement={canvasRef} socket={socket} />
             {/* <Actor /> */}
         </>
     );

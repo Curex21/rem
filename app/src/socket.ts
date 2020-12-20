@@ -1,18 +1,25 @@
-export const SOCKETIO_ENDPOINT = "http://127.0.0.1:4001";
 import { io, Socket } from "socket.io-client";
+import useStore from "./store";
+import shallow from "zustand/shallow";
+import { useState } from "react";
+
+export const SOCKETIO_ENDPOINT = "http://127.0.0.1:4001";
 
 export const useSocketConnection = () => {
-    const socket = io(SOCKETIO_ENDPOINT, {
-        transports: ["websocket"],
-        upgrade: false,
-    });
-
+    const [socket, setSocket] = useState<Socket>(
+        io(SOCKETIO_ENDPOINT, {
+            // transports: ["websocket"],
+            // upgrade: false,
+        })
+    );
     return socket;
 };
 
-export const useSocketBroadcaster = (socket: Socket) => {
-    let peerConnections: { [key: string]: RTCPeerConnection } = {};
-    let ownID: string;
+export const useSocketBroadcaster = (socket: Socket, performWatcher: (id: string, conn: RTCPeerConnection) => void) => {
+    const [peerConnections, registerNewPeer] = useStore(
+        (store) => [store.peerConnections, store.registerNewPeer],
+        shallow
+    );
 
     const config = {
         iceServers: [
@@ -23,34 +30,17 @@ export const useSocketBroadcaster = (socket: Socket) => {
     };
 
     socket.on("node-connection", (peerID: string) => {
-        console.log(`node-connection (${peerID}) send to node-watcher (${ownID})`);
-        socket.send("node-watcher", ownID);
+        // console.log(`[${socket.id}] node-connection: (${peerID}) send to node-watcher`);
+        socket.emit("node-watcher", peerID);
         // socket.to(peerID).emit(); // cross roads
     });
 
     socket.on("node-watcher", (who: string) => {
+        console.log(`node-watcher: ${who}`);
         const peerConnection = new RTCPeerConnection(config);
-        peerConnections[who] = peerConnection;
-
-        //@ts-ignore
-        let stream: MediaStream = canvasRef.captureStream(25);
-
-        console.log(stream);
-
-        // stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
-
-        // peerConnection.onicecandidate = (event) => {
-        //     if (event.candidate) {
-        //         socket.emit("candidate", id, event.candidate);
-        //     }
-        // };
-
-        // peerConnection
-        //     .createOffer()
-        //     .then((sdp) => peerConnection.setLocalDescription(sdp))
-        //     .then(() => {
-        //         socket.emit("offer", id, peerConnection.localDescription);
-        //     });
+        registerNewPeer(who, peerConnection);
+        // peerConnections[who] = peerConnection;
+        performWatcher(who, peerConnection);
     });
 
     socket.on("answer", (id: string, description: RTCSessionDescription) => {
@@ -67,7 +57,8 @@ export const useSocketBroadcaster = (socket: Socket) => {
     });
 
     const connect = () => {
-        socket.send("node-connection");
+        console.log("sending node-connection event");
+        socket.emit("node-connection");
     };
 
     return [connect];

@@ -7,36 +7,22 @@ export const handleSocketConnection = (socket: socketIO.Socket) => {
 
     socket.on("node-connection", () => {
         nodes.add(socket.id);
-
-        console.log("new connection: " + socket.id);
-
-        // Array.from(nodes).forEach((node: string) => {
-        //     if (node === socket.id) {
-        //         return;
-        //     }
-
-        // });
-        // console.log(`send (${socket.id}) to other node (${node})`);
-        console.log(`broadcast from ${socket.id}`);
+        // console.log("new connection: " + socket.id);
+        // console.log(`[${socket.id}] emiting broadcast to all`);
         socket.broadcast.emit("node-connection", socket.id);
     });
 
-    socket.on("node-watcher", (who: string) => {
-        console.log("receive watcher signal: " + who);
-        socket.to(socket.id).emit("node-watcher", who);
+    socket.on("node-watcher", (peerID: string) => {
+        // console.log("receive watcher signal: " + who);
+        // console.log("send node-watcher to " + socket.id);
+        socket.to(peerID).emit("node-watcher", socket.id);
         // socket.broadcast.emit("node-watcher", id);
     });
 
-    socket.on("disconnect", (id: string, msg: string) => {
+    socket.on("disconnect", () => {
         console.log("disconnect pair: " + socket.id);
-        Array.from(nodes).map((node) => {
-            if (node === id) {
-                return;
-            }
-            console.log("closing connection to other nodes: " + node);
-            socket.to(node).emit("disconnectPeer", id);
-        });
-        nodes.delete(id);
+        nodes.delete(socket.id);
+        socket.broadcast.emit("disconnectPeer", socket.id);
         // socket.to(broadcaster).emit("disconnectPeer", socket.id);
     });
 
