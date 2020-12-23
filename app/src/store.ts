@@ -1,13 +1,16 @@
 import create from "zustand";
 
 type State = {
-    bears: number;
-    increase: (by: number) => void;
+    peerConnections: { [key: string]: RTCPeerConnection };
+    registerNewPeer: (peerID: string, conn: RTCPeerConnection) => void;
 };
 
 const useStore = create<State>((set) => ({
-    bears: 0,
-    increase: () => set((state) => ({ bears: state.bears + 1 })),
+    peerConnections: {},
+    registerNewPeer: (peerID: string, conn: RTCPeerConnection) =>
+        set((state) => ({
+            peerConnections: { ...state.peerConnections, [peerID]: conn },
+        })),
 }));
 
 export default useStore;

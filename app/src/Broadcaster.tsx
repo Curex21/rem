@@ -1,85 +1,51 @@
-import React, { FC, useEffect } from "react";
+import React, { FC, Ref, useEffect, useRef, useState } from "react";
+import { Socket } from "socket.io-client";
 // import { Manager } from "socket.io-client";
-import { SOCKETIO_ENDPOINT } from "./socket";
-import socketIOClient from "socket.io-client";
+import { useSocketBroadcaster } from "./socket";
+// import { zmqSetup } from "./zmq";
 
-const Broadcaster: FC = () => {
-    useEffect(() => {
-        const peerConnections: { [key: string]: RTCPeerConnection } = {};
+interface PropsBroadcaster {
+    canvasElement?: HTMLCanvasElement;
+    socket: Socket;
+}
 
-        const config = {
-            iceServers: [
-                {
-                    urls: ["stun:stun.l.google.com:19302"],
-                },
-            ],
-        };
+const Broadcaster: FC<PropsBroadcaster> = ({ socket, canvasElement }: PropsBroadcaster) => {
+    console.log(canvasElement);
 
+    const [connect] = useSocketBroadcaster(socket, (id, peerConnection) => {
         //@ts-ignore
-        const socket = socketIOClient(SOCKETIO_ENDPOINT);
+        let stream: MediaStream = canvasElement.captureStream(25);
 
-        const video = document.querySelector<HTMLVideoElement>("video#broadcaster");
+        console.log(stream);
 
-        if (video === undefined || video === null) {
-            return;
-        }
+        stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
 
-        const constraints = {
-            video: { facingMode: "user" },
-        };
-
-        navigator.mediaDevices
-            .getUserMedia(constraints)
-            .then((stream) => {
-                video.srcObject = stream;
-                socket.emit("broadcaster");
-            })
-            .catch((error) => console.error(error));
-
-        socket.on("watcher", (id: string) => {
-            const peerConnection = new RTCPeerConnection(config);
-            peerConnections[id] = peerConnection;
-
-            let stream = video.srcObject;
-            if (stream === undefined || stream === null) {
-                return;
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                socket.emit("candidate", id, event.candidate);
             }
-
-            (stream as MediaStream)
-                .getTracks()
-                .forEach((track) => peerConnection.addTrack(track, stream as MediaStream));
-
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    socket.emit("candidate", id, event.candidate);
-                }
-            };
-
-            peerConnection
-                .createOffer()
-                .then((sdp) => peerConnection.setLocalDescription(sdp))
-                .then(() => {
-                    socket.emit("offer", id, peerConnection.localDescription);
-                });
-        });
-
-        socket.on("answer", (id: string, description: RTCSessionDescription) => {
-            peerConnections[id].setRemoteDescription(description);
-        });
-
-        socket.on("candidate", (id: string, candidate: RTCIceCandidateInit) => {
-            peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
-        });
-
-        socket.on("disconnectPeer", (id: string) => {
-            peerConnections[id].close();
-            delete peerConnections[id];
-        });
-
-        window.onunload = window.onbeforeunload = () => {
-            socket._close();
         };
-    }, []);
+
+        peerConnection
+            .createOffer()
+            .then((sdp) => peerConnection.setLocalDescription(sdp))
+            .then(() => {
+                socket.emit("offer", id, peerConnection.localDescription);
+            });
+    });
+
+    useEffect(() => {
+        canvasElement && connect();
+
+        return () => {
+            // console.log("sending socket disconnection");
+            // socket.close();
+        };
+    }, [canvasElement]);
+
+    // useEffect(() => {
+    //     setSocketID(socket.id);
+    // }, [socket]);
 
     return (
         <div>

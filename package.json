@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "license": "MIT",
     "scripts": {
-        "start": "ts-node-dev --respawn  --project ./tsconfig.json -- server.ts"
+        "start": "ts-node-dev --respawn  --project ./tsconfig.json -- index.ts"
     },
     "devDependencies": {
         "@types/cors": "^2.8.9",
@@ -16,6 +16,8 @@
     "dependencies": {
         "cors": "^2.8.5",
         "express": "^4.17.1",
-        "socket.io": "^3.0.4"
+        "nanoid": "^3.1.20",
+        "socket.io": "^3.0.4",
+        "zeromq": "6.0.0-beta.6"
     }
 }
