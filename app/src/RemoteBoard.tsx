@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { SOCKETIO_ENDPOINT } from "./socket";
 // import socketIOClient from "socket.io-client";
 
-const Actor = () => {
+const RemoteBoard = () => {
     useEffect(() => {
         // let peerConnection: RTCPeerConnection;
         // const config = {
@@ -62,4 +62,4 @@ const Actor = () => {
     );
 };
 
-export default Actor;
+export default RemoteBoard;

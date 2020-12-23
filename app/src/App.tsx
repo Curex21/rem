@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import Actor from "./Actor";
+import RemoteBoard from "./RemoteBoard";
 import BasicBoard from "./BasicBoard";
 import Broadcaster from "./Broadcaster";
 import { useSocketConnection } from "./socket";

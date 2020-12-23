@@ -56,6 +56,26 @@ export const useSocketBroadcaster = (socket: Socket, performWatcher: (id: string
         delete peerConnections[id];
     });
 
+    socket.on("offer", (id: string, description: RTCSessionDescription) => {
+        peerConnections[id]
+            .setRemoteDescription(description)
+            .then(() => peerConnections[id].createAnswer())
+            .then((sdp) => peerConnections[id].setLocalDescription(sdp))
+            .then(() => {
+                socket.emit("answer", id, peerConnections[id].localDescription);
+            });
+        peerConnections[id].ontrack = (event) => {
+            // video.srcObject = event.streams[0];
+            // TODO: Track canvas
+        };
+
+        peerConnections[id].onicecandidate = (event) => {
+            if (event.candidate) {
+                socket.emit("candidate", id, event.candidate);
+            }
+        };
+    });
+
     const connect = () => {
         console.log("sending node-connection event");
         socket.emit("node-connection");

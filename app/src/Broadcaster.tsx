@@ -1,7 +1,7 @@
 import React, { FC, Ref, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 // import { Manager } from "socket.io-client";
-import { SOCKETIO_ENDPOINT, useSocketBroadcaster } from "./socket";
+import { useSocketBroadcaster } from "./socket";
 // import { zmqSetup } from "./zmq";
 
 interface PropsBroadcaster {
