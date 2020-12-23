@@ -5,6 +5,7 @@ import BasicBoard from "./BasicBoard";
 
 import { createSocketConnection } from "./socket";
 import { Socket } from "socket.io-client";
+import SceneProvider from "./SceneProvider";
 
 interface AppProps {
     socket: Socket;
@@ -32,7 +33,14 @@ const App: React.FC<AppProps> = ({ socket }: AppProps) => {
     }
 
     if (isSceneProvider) {
-        return <div>I'm an scene provider</div>;
+        return (
+            <div>
+                I'm an scene provider
+                <div>
+                    <SceneProvider socket={socket} width={width} height={height} />
+                </div>
+            </div>
+        );
     }
 
     return (
