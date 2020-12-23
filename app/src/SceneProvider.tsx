@@ -20,13 +20,12 @@ interface PeerConnection {
 }
 
 interface RemoteBoardProps {
-    canvasElement?: HTMLCanvasElement;
     socket: Socket;
     width?: string | number;
     height?: string | number;
 }
 
-const SceneProvider: FC<RemoteBoardProps> = ({ canvasElement, socket, width, height }: RemoteBoardProps) => {
+const SceneProvider: FC<RemoteBoardProps> = ({ socket, width, height }: RemoteBoardProps) => {
     // const [videoRefs, setVideoRefs] = useState<RefObject<HTMLVideoElement>[]>([]);
 
     const [remoteCanvas, setRemoteCanvas] = useState<PeerConnection>({});
@@ -55,10 +54,6 @@ const SceneProvider: FC<RemoteBoardProps> = ({ canvasElement, socket, width, hei
     }, [remoteCanvas]);
 
     useEffect(() => {
-        if (!canvasElement) {
-            return;
-        }
-
         const peer = new Peer();
 
         socket.on("contact-list", (nodes: Array<Node>) => {
@@ -152,7 +147,7 @@ const SceneProvider: FC<RemoteBoardProps> = ({ canvasElement, socket, width, hei
         peer.on("disconnected", () => {
             console.log("disconnecting");
         });
-    }, [canvasElement]);
+    }, []);
 
     return (
         <>
