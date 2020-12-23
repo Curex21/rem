@@ -1,63 +1,68 @@
-import React, { useEffect } from "react";
+import React, { FC, useEffect, useState } from "react";
+import { Socket } from "socket.io-client";
+import Peer from "peerjs";
+// import { SOCKETIO_ENDPOINT } from "./socket";
 // import { Manager } from "socket.io-client";
-import { SOCKETIO_ENDPOINT } from "./socket";
 // import socketIOClient from "socket.io-client";
 
-const RemoteBoard = () => {
+interface RemoteBoardProps {
+    canvasElement?: HTMLCanvasElement;
+    socket: Socket;
+}
+
+const RemoteBoard: FC<RemoteBoardProps> = ({ canvasElement, socket }: RemoteBoardProps) => {
+    const [remoteCanvas, setRemoteCanvas] = useState<HTMLVideoElement[]>([]);
     useEffect(() => {
-        // let peerConnection: RTCPeerConnection;
-        // const config = {
-        //     iceServers: [
-        //         {
-        //             urls: ["stun:stun.l.google.com:19302"],
-        //         },
-        //     ],
-        // };
-        // //@ts-ignore
-        // const socket = socketIOClient(SOCKETIO_ENDPOINT);
-        // const video = document.querySelector<HTMLVideoElement>("video#actor");
-        // if (video === undefined || video === null) {
-        //     return;
-        // }
-        // socket.on("offer", (id: string, description: RTCSessionDescriptionInit) => {
-        //     peerConnection = new RTCPeerConnection(config);
-        //     peerConnection
-        //         .setRemoteDescription(description)
-        //         .then(() => peerConnection.createAnswer())
-        //         .then((sdp) => peerConnection.setLocalDescription(sdp))
-        //         .then(() => {
-        //             socket.emit("answer", id, peerConnection.localDescription);
-        //         });
-        //     peerConnection.ontrack = (event) => {
-        //         video.srcObject = event.streams[0];
-        //     };
-        //     peerConnection.onicecandidate = (event) => {
-        //         if (event.candidate) {
-        //             socket.emit("candidate", id, event.candidate);
-        //         }
-        //     };
-        // });
-        // socket.on("candidate", (id: string, candidate: RTCIceCandidateInit) => {
-        //     peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).catch((e) => console.error(e));
-        // });
-        // socket.on("connect", () => {
-        //     socket.emit("watcher");
-        // });
-        // socket.on("broadcaster", () => {
-        //     socket.emit("watcher");
-        // });
-        // socket.on("disconnectPeer", () => {
-        //     peerConnection.close();
-        // });
-        // window.onunload = window.onbeforeunload = () => {
-        //     socket.close();
-        // };
-    }, []);
+        if (!canvasElement) {
+            return;
+        }
+
+        const peer = new Peer();
+
+        socket.on("contact-list", (nodes: Array<string>) => {
+            console.log("list: ", nodes);
+            nodes
+                .filter((n) => n !== peer.id)
+                .forEach((n) => {
+                    console.log(`calling ${n}...`);
+
+                    //@ts-ignore
+                    let stream: MediaStream = canvasElement.captureStream(25);
+                    console.log("my own canvas stream", stream);
+
+                    const call = peer.call(n, stream);
+
+                    call.on("stream", (remoteStream: MediaStream) => {
+                        const video = document.createElement("video");
+                        video.srcObject = remoteStream;
+                        video.playsInline = true;
+                        video.autoplay = true;
+                        video.muted = true;
+                        setRemoteCanvas([...remoteCanvas, video]);
+                    });
+                });
+        });
+
+        peer.on("open", (id: string) => socket.emit("register-node", id));
+
+        peer.on("call", (call: Peer.MediaConnection) => {
+            //@ts-ignore
+            let stream: MediaStream = canvasElement.captureStream(25);
+            console.log("my own canvas stream", stream);
+            call.answer(stream); // Answer the call with an A/V stream.
+            call.on("stream", (remoteStream) => {
+                // Show stream in some <video> element.
+                console.log("unhandled stream:", remoteStream);
+            });
+        });
+    }, [canvasElement]);
 
     return (
         <div>
-            I'm an Actor
-            <video id="actor" playsInline autoPlay></video>
+            I'm an Remote Board
+            {remoteCanvas.map((c) => (
+                <div>canvas {c}</div>
+            ))}
         </div>
     );
 };

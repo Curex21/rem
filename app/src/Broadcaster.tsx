@@ -1,7 +1,7 @@
 import React, { FC, Ref, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 // import { Manager } from "socket.io-client";
-import { useSocketBroadcaster } from "./socket";
+import { useSocket } from "./socket";
 // import { zmqSetup } from "./zmq";
 
 interface PropsBroadcaster {
@@ -10,13 +10,19 @@ interface PropsBroadcaster {
 }
 
 const Broadcaster: FC<PropsBroadcaster> = ({ socket, canvasElement }: PropsBroadcaster) => {
-    console.log(canvasElement);
+    // console.log(canvasElement);
 
-    const [connect] = useSocketBroadcaster(socket, (id, peerConnection) => {
+    const [connect] = useSocket(socket, (id, peerConnection) => {
+        console.log("perform offer to ice server", canvasElement);
+
+        if (!canvasElement) {
+            return;
+        }
+
         //@ts-ignore
         let stream: MediaStream = canvasElement.captureStream(25);
 
-        console.log(stream);
+        console.log("my own canvas stream", canvasElement);
 
         stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
 
@@ -35,7 +41,10 @@ const Broadcaster: FC<PropsBroadcaster> = ({ socket, canvasElement }: PropsBroad
     });
 
     useEffect(() => {
-        canvasElement && connect();
+        if (canvasElement) {
+            console.log("connecting");
+            connect();
+        }
 
         return () => {
             // console.log("sending socket disconnection");
