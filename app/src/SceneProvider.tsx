@@ -58,17 +58,15 @@ const SceneProvider: FC<RemoteBoardProps> = ({ socket, width, height }: RemoteBo
 
         socket.on("contact-list", (nodes: Array<Node>) => {
             console.log(`I'm ${peer.id}, ready to connect with my peers`);
-            nodes.forEach((node: Node) => {
-                console.log(`calling to ${node.id}`);
 
-                const conn = peer.connect(node.id);
+            navigator.mediaDevices
+                .getUserMedia({ video: true })
+                .then((stream) => {
+                    nodes.forEach((node: Node) => {
+                        console.log(`calling to ${node.id}`);
 
-                //@ts-ignore
-                // let stream: MediaStream = canvasElement.captureStream(25);
+                        const conn = peer.connect(node.id);
 
-                navigator.mediaDevices
-                    .getUserMedia({ video: true })
-                    .then((stream) => {
                         const call = peer.call(node.id, stream);
                         call.on("stream", (remoteStream) => {
                             // Show stream in some <video> element.
@@ -88,22 +86,22 @@ const SceneProvider: FC<RemoteBoardProps> = ({ socket, width, height }: RemoteBo
                         });
 
                         conn.send("hello");
-                    })
-                    .catch((err) => console.log(err));
 
-                // const call = peer.call(node.id, stream);
+                        // const call = peer.call(node.id, stream);
 
-                // call.on("stream", (remoteStream: MediaStream) => {
-                //     setRemoteCanvas((r) => ({ ...r, [call.peer]: { media: remoteStream, ref: null } }));
-                // });
+                        // call.on("stream", (remoteStream: MediaStream) => {
+                        //     setRemoteCanvas((r) => ({ ...r, [call.peer]: { media: remoteStream, ref: null } }));
+                        // });
 
-                // call.on("close", () => {
-                //     console.log(`closing call with ${call.peer}`);
-                //     let newRemoteCanvas = { ...remoteCanvas };
-                //     delete newRemoteCanvas[call.peer];
-                //     setRemoteCanvas(newRemoteCanvas);
-                // });
-            });
+                        // call.on("close", () => {
+                        //     console.log(`closing call with ${call.peer}`);
+                        //     let newRemoteCanvas = { ...remoteCanvas };
+                        //     delete newRemoteCanvas[call.peer];
+                        //     setRemoteCanvas(newRemoteCanvas);
+                        // });
+                    });
+                })
+                .catch((err) => console.log(err));
         });
 
         peer.on("open", (id: string) => socket.emit("register-node", id));
