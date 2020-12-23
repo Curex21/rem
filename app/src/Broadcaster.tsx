@@ -1,7 +1,7 @@
 import React, { FC, Ref, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 // import { Manager } from "socket.io-client";
-import { useSocket } from "./socket";
+// import { useSocket } from "./socket";
 // import { zmqSetup } from "./zmq";
 
 interface PropsBroadcaster {
@@ -12,38 +12,38 @@ interface PropsBroadcaster {
 const Broadcaster: FC<PropsBroadcaster> = ({ socket, canvasElement }: PropsBroadcaster) => {
     // console.log(canvasElement);
 
-    const [connect] = useSocket(socket, (id, peerConnection) => {
-        console.log("perform offer to ice server", canvasElement);
+    // const [connect] = useSocket(socket, (id, peerConnection) => {
+    //     console.log("perform offer to ice server", canvasElement);
 
-        if (!canvasElement) {
-            return;
-        }
+    //     if (!canvasElement) {
+    //         return;
+    //     }
 
-        //@ts-ignore
-        let stream: MediaStream = canvasElement.captureStream(25);
+    //     //@ts-ignore
+    //     let stream: MediaStream = canvasElement.captureStream(25);
 
-        console.log("my own canvas stream", canvasElement);
+    //     console.log("my own canvas stream", canvasElement);
 
-        stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
+    //     stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
 
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                socket.emit("candidate", id, event.candidate);
-            }
-        };
+    //     peerConnection.onicecandidate = (event) => {
+    //         if (event.candidate) {
+    //             socket.emit("candidate", id, event.candidate);
+    //         }
+    //     };
 
-        peerConnection
-            .createOffer()
-            .then((sdp) => peerConnection.setLocalDescription(sdp))
-            .then(() => {
-                socket.emit("offer", id, peerConnection.localDescription);
-            });
-    });
+    //     peerConnection
+    //         .createOffer()
+    //         .then((sdp) => peerConnection.setLocalDescription(sdp))
+    //         .then(() => {
+    //             socket.emit("offer", id, peerConnection.localDescription);
+    //         });
+    // });
 
     useEffect(() => {
         if (canvasElement) {
             console.log("connecting");
-            connect();
+            // connect();
         }
 
         return () => {

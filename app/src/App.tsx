@@ -3,18 +3,22 @@ import RemoteBoards from "./RemoteBoard";
 import BasicBoard from "./BasicBoard";
 // import styled from "styled-components";
 
-import { useSocketConnection } from "./socket";
+import { createSocketConnection } from "./socket";
+import { Socket } from "socket.io-client";
 
-const App: React.FC = () => {
+interface AppProps {
+    socket: Socket;
+}
+
+const App: React.FC<AppProps> = ({ socket }: AppProps) => {
     // const canvasRef = useRef<HTMLCanvasElement>();
     const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement>();
-    const socket = useSocketConnection();
 
     const width = 600;
     const height = 400;
     // console.log(canvasRef);
 
-    const colors = ["#e7f521", "#21f5d9", "#f54121"];
+    const colors = ["#21f533", "#4821f5", "#e7f521", "#21f5d9", "#f54121"];
     return (
         <div style={{ position: "relative", backgroundColor: "black" }}>
             {/* <div style={{ position: "absolute" }}> */}

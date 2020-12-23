@@ -1,9 +1,6 @@
 import React, { createRef, FC, RefObject, useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import Peer from "peerjs";
-// import { SOCKETIO_ENDPOINT } from "./socket";
-// import { Manager } from "socket.io-client";
-// import socketIOClient from "socket.io-client";
 
 interface RemoteData {
     type: "hello" | "bye";
