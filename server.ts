@@ -5,12 +5,15 @@ let nodes: Set<string> = new Set();
 let sceneProvider: string;
 
 export const handleSocketConnection = (socket: socketIO.Socket) => {
-    console.log(`socket id: ${socket.id}`);
+    console.log(`hello ${socket.id}`);
 
     socket.on("register-node", (id: string) => {
         nodes.add(id);
         nodesTable[socket.id] = id;
-        socket.emit("contact-list", Array.from(nodes));
+        socket.emit(
+            "contact-list",
+            Array.from(nodes).filter((n) => n !== id)
+        );
     });
 
     socket.on("register-scene-provider", (id: string) => {
@@ -21,7 +24,7 @@ export const handleSocketConnection = (socket: socketIO.Socket) => {
     });
 
     socket.on("disconnect", () => {
-        console.log("bye bye");
+        console.log(`bye ${socket.id}`);
         nodes.delete(nodesTable[socket.id]);
         delete nodesTable[socket.id];
     });

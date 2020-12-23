@@ -1,26 +1,35 @@
 import React, { useRef, useState } from "react";
-import RemoteBoard from "./RemoteBoard";
+import RemoteBoards from "./RemoteBoard";
 import BasicBoard from "./BasicBoard";
-// import Broadcaster from "./Broadcaster";
+// import styled from "styled-components";
+
 import { useSocketConnection } from "./socket";
 
 const App: React.FC = () => {
     // const canvasRef = useRef<HTMLCanvasElement>();
-    const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement>();
+    const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement>();
     const socket = useSocketConnection();
 
+    const width = 600;
+    const height = 400;
     // console.log(canvasRef);
 
+    const colors = ["#e7f521", "#21f5d9", "#f54121"];
     return (
-        <>
-            <BasicBoard
-                pointerColor={"#21f5d9"}
-                pointerScale={3}
-                onCanvasLoaded={(canvas) => setCanvasRef(canvas?.children[0] as HTMLCanvasElement)}
-            />
-            <RemoteBoard canvasElement={canvasRef} socket={socket} />
-            {/* <Actor /> */}
-        </>
+        <div style={{ position: "relative", background: "black" }}>
+            {/* <div style={{ position: "absolute" }}> */}
+            <RemoteBoards canvasElement={canvasElement} socket={socket} width={width} height={height} />
+            {/* </div> */}
+            <div style={{ position: "absolute" }}>
+                <BasicBoard
+                    width={width}
+                    height={height}
+                    pointerColor={colors[Math.floor(Math.random() * colors.length)]}
+                    pointerScale={3}
+                    onCanvasLoaded={(canvas) => setCanvasElement(canvas?.children[0] as HTMLCanvasElement)}
+                />
+            </div>
+        </div>
     );
 };
 
