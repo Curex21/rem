@@ -40,12 +40,12 @@ const BasicBoard: React.FC<BasicBoardProps> = ({
     //See annotations in JS for more information
     const setup = (p5: P5, canvasParentRef: Element) => {
         p5.createCanvas(w, h).parent(canvasParentRef);
-        // p5.background("transparent");
+        p5.background("transparent");
         onCanvasRef && onCanvasRef(canvasParentRef as HTMLCanvasElement);
     };
 
     const draw = (p5: P5) => {
-        // p5.background("transparent");
+        p5.background("transparent");
         // p5.ellipse(x, y, 70, 70);
         // x++;
         points.map((p) => {

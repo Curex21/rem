@@ -5,6 +5,11 @@ import Peer from "peerjs";
 interface RemoteData {
     type: "hello" | "bye";
 }
+
+interface Node {
+    id: string;
+    color: string;
+}
 interface MediaStreamRef {
     media: MediaStream;
     ref: RefObject<HTMLVideoElement> | null;
@@ -68,12 +73,12 @@ const RemoteBoards: FC<RemoteBoardProps> = ({ canvasElement, socket, width, heig
 
         const peer = new Peer();
 
-        socket.on("contact-list", (nodes: Array<string>) => {
+        socket.on("contact-list", (nodes: Array<Node>) => {
             console.log(`I'm ${peer.id}, ready to connect with my peers`);
-            nodes.forEach((n) => {
-                console.log(`calling to ${n}`);
+            nodes.forEach((node: Node) => {
+                console.log(`calling to ${node}`);
 
-                const conn = peer.connect(n);
+                const conn = peer.connect(node.id);
 
                 conn.send("hello");
 
@@ -91,7 +96,7 @@ const RemoteBoards: FC<RemoteBoardProps> = ({ canvasElement, socket, width, heig
                 //@ts-ignore
                 let stream: MediaStream = canvasElement.captureStream(25);
 
-                const call = peer.call(n, stream);
+                const call = peer.call(node.id, stream);
 
                 call.on("stream", (remoteStream: MediaStream) => {
                     setRemoteCanvas((r) => ({ ...r, [call.peer]: { media: remoteStream, ref: null } }));

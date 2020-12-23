@@ -14,11 +14,12 @@ const App: React.FC<AppProps> = ({ socket }: AppProps) => {
     // const canvasRef = useRef<HTMLCanvasElement>();
     const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement>();
 
-    const width = 600;
-    const height = 400;
+    const width = 860;
+    const height = 640;
     // console.log(canvasRef);
 
     const colors = ["#21f533", "#4821f5", "#e7f521", "#21f5d9", "#f54121"];
+
     return (
         <div style={{ position: "relative", backgroundColor: "black" }}>
             {/* <div style={{ position: "absolute" }}> */}
