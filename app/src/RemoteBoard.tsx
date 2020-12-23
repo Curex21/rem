@@ -5,7 +5,7 @@ import Peer from "peerjs";
 // import { Manager } from "socket.io-client";
 // import socketIOClient from "socket.io-client";
 
-interface RemotesData {
+interface RemoteData {
     type: "hello" | "bye";
 }
 interface MediaStreamRef {
@@ -74,13 +74,13 @@ const RemoteBoards: FC<RemoteBoardProps> = ({ canvasElement, socket, width, heig
         socket.on("contact-list", (nodes: Array<string>) => {
             console.log(`I'm ${peer.id}, ready to connect with my peers`);
             nodes.forEach((n) => {
-                //@ts-ignore
-                let stream: MediaStream = canvasElement.captureStream(25);
-                console.log(`calling ${n}`);
+                console.log(`calling to ${n}`);
 
                 const conn = peer.connect(n);
 
-                conn.on("data", (data: RemotesData) => {
+                conn.send("hello");
+
+                conn.on("data", (data: RemoteData) => {
                     console.log(`event [${data.type}] from ${conn.peer}`);
                 });
 
@@ -91,10 +91,12 @@ const RemoteBoards: FC<RemoteBoardProps> = ({ canvasElement, socket, width, heig
                     setRemoteCanvas(newRemoteCanvas);
                 });
 
+                //@ts-ignore
+                let stream: MediaStream = canvasElement.captureStream(25);
+
                 const call = peer.call(n, stream);
 
                 call.on("stream", (remoteStream: MediaStream) => {
-                    // setRemoteCanvas((remoteCanvas) => [...remoteCanvas, remoteStream]);
                     setRemoteCanvas((r) => ({ ...r, [call.peer]: { media: remoteStream, ref: null } }));
                 });
 
@@ -129,7 +131,7 @@ const RemoteBoards: FC<RemoteBoardProps> = ({ canvasElement, socket, width, heig
 
             const conn = peer.connect(call.peer);
 
-            conn.on("data", (data: RemotesData) => {
+            conn.on("data", (data: RemoteData) => {
                 console.log(`event [${data.type}] from ${conn.peer}`);
             });
 
@@ -160,7 +162,7 @@ const RemoteBoards: FC<RemoteBoardProps> = ({ canvasElement, socket, width, heig
                     muted
                     width={width}
                     height={height}
-                    style={{ position: "absolute" }}
+                    style={{ position: "absolute", mixBlendMode: "lighten" }}
                 ></video>
             ))}
         </>

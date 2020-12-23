@@ -16,16 +16,16 @@ const App: React.FC = () => {
 
     const colors = ["#e7f521", "#21f5d9", "#f54121"];
     return (
-        <div style={{ position: "relative", background: "black" }}>
+        <div style={{ position: "relative", backgroundColor: "black" }}>
             {/* <div style={{ position: "absolute" }}> */}
             <RemoteBoards canvasElement={canvasElement} socket={socket} width={width} height={height} />
             {/* </div> */}
-            <div style={{ position: "absolute" }}>
+            <div style={{ position: "absolute", mixBlendMode: "lighten" }}>
                 <BasicBoard
                     width={width}
                     height={height}
                     pointerColor={colors[Math.floor(Math.random() * colors.length)]}
-                    pointerScale={3}
+                    pointerScale={2}
                     onCanvasLoaded={(canvas) => setCanvasElement(canvas?.children[0] as HTMLCanvasElement)}
                 />
             </div>
