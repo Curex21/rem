@@ -4,13 +4,13 @@ FROM node:14
 WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY package.json ./
-COPY yarn.lock ./
+COPY package.json ./package.json
+COPY yarn.lock ./yarn.lock
 RUN yarn
 
 RUN mkdir ./app
-COPY app/package.json ./app/
-COPY app/yarn.lock ./app/
+COPY app/package.json ./app/package.json
+COPY app/yarn.lock ./app/yarn.lock
 
 RUN yarn --cwd app
 
