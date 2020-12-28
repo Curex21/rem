@@ -3,3 +3,4 @@ yarn.lock
 rem
 app/dist
 app/.cache
+.DS_Store
