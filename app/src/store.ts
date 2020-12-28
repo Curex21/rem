@@ -13,4 +13,6 @@ const useStore = create<State>((set) => ({
         })),
 }));
 
+const createStore = () => {};
+
 export default useStore;

@@ -15,6 +15,8 @@ interface BasicBoardProps {
     pointerScale?: number;
     pointerSmooth?: number;
     onCanvasLoaded?: (canvas: HTMLCanvasElement) => void;
+    width?: string | number;
+    height?: string | number;
 }
 
 const BasicBoard: React.FC<BasicBoardProps> = ({
@@ -22,6 +24,8 @@ const BasicBoard: React.FC<BasicBoardProps> = ({
     onCanvasLoaded: onCanvasRef,
     pointerScale = 1,
     pointerSmooth = 1,
+    width = 500,
+    height = 500,
 }: BasicBoardProps) => {
     const minR = 3 * pointerScale;
     const deltaR = 1.8 * pointerScale;
@@ -29,15 +33,19 @@ const BasicBoard: React.FC<BasicBoardProps> = ({
 
     let points: DrawPoint[] = [];
 
+    let w: number = typeof width === "string" ? Number.parseInt(width) : width;
+
+    let h: number = typeof height === "string" ? Number.parseInt(height) : height;
+
     //See annotations in JS for more information
     const setup = (p5: P5, canvasParentRef: Element) => {
-        p5.createCanvas(500, 500).parent(canvasParentRef);
-        p5.background("transparent");
+        p5.createCanvas(w, h).parent(canvasParentRef);
+        // p5.background("transparent");
         onCanvasRef && onCanvasRef(canvasParentRef as HTMLCanvasElement);
     };
 
     const draw = (p5: P5) => {
-        p5.background("transparent");
+        // p5.background("transparent");
         // p5.ellipse(x, y, 70, 70);
         // x++;
         points.map((p) => {
